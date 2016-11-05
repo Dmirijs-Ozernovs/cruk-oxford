@@ -8,12 +8,22 @@ highchart_legend <-
     chart <- highchart() %>%
       hc_legend(
         align = "center",
-        verticalAlign = "middle",
-        floating = TRUE,
-        itemMarginBottom = 10,
+        verticalAlign = "top",
+        floating = FALSE,
+        itemMarginBottom = 5,
+        itemMarginTop = 5,
+        y = 0,
+        maxHeight = 400,
         enabled = TRUE,
         navigation = list(
-          enabled = FALSE
+          enabled = FALSE,
+            animation = true,
+            arrowSize = 12,
+            style = list(
+              fontWeight = 'bold',
+              color = '#333',
+              fontSize = '12px'	
+            )
         )
       ) %>%
       hc_xAxis(gridLineWidth = 0,
@@ -24,7 +34,7 @@ highchart_legend <-
                  enabled = FALSE
                )) %>%
       hc_title(text = "") %>%
-      hc_chart(height = 150) %>%
+      hc_chart(height = 300) %>%
       hc_yAxis(title = list(text = "")) %>%
       hc_credits(enabled = FALSE)
     
@@ -43,4 +53,5 @@ highchart_legend <-
     chart
   }
 
-highchart_legend()
+
+
