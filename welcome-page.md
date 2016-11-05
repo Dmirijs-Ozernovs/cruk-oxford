@@ -1,0 +1,18 @@
+
+<p><h1>Welcome to the CRUK Oxford Centre Research Bridge Project</h1></p>
+
+
+<img src = "images/research-bridge.png" style="max-width:100;float:right;margin-right:20px;width:250px;margin-left:30px"/>
+<p>
+<strong>Research Bridge</strong> is a network analysis and resource discovery tool for CRUK Centre researchers to support them in their efforts to reach across the boundaries of disciplines, departments and divisions to develop collaborative research that will drive new breakthroughs in their field.
+</p>
+
+
+
+<p>
+<strong>Research Bridge</strong> can be used by individual researchers to identify expertise and key collaborative opportunities within their local networks. It can also aid the leaders of the Centre to drive activities which can enhance collaboration across the community as a whole.
+</p>
+
+<p>
+The goal is to provide new information about how collaborations are developing within the Centre network, to provide opportunities to form new collaborations with the aim of solving problems in new creative ways, and to support the access and creation of impactful multi-disciplinary research.
+</p>
