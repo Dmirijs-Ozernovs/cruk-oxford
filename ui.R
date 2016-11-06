@@ -49,7 +49,9 @@ shinyUI(
     tabPanel(
       "Welcome",
       fluidPage(
-        "Welcome to the CRUK Collaboration Network explorer"
+        includeMarkdown(
+          knitr::knit("welcome-page.Rmd")
+        )
       )
     ),
     tabPanel(
@@ -58,7 +60,9 @@ shinyUI(
         useShinyjs(),
         inlineCSS(appCSS),
         wellPanel(
-          "Collaboration overview for the entire institution, see elsewhere (LINKS) for department/person overview"
+          includeMarkdown(
+            knitr::knit("centre-tab_top-description.Rmd")
+          )
         ),
         bsCollapse(
           id = "collapseExample",
@@ -97,7 +101,7 @@ shinyUI(
             width = 8
           )
         ),
-        highchartOutput("institution_highchart_node_legened", height = "150px"),
+        highchartOutput("institution_highchart_node_legened", height = "200px"),
         uiOutput("institution_selected_node_table_UI")
         # wellPanel(
         #   DT::dataTableOutput("selected_node_table")
@@ -149,7 +153,7 @@ shinyUI(
                   width = 8
                 )
               ),
-              highchartOutput("department_highchart_node_legened", height = "150px"),
+              highchartOutput("department_highchart_node_legened", height = "200px"),
               uiOutput("department_selected_node_table_UI")
             )
           )

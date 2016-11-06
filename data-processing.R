@@ -9,13 +9,17 @@
 ## ================================================================================
 
 
+# institution_nodes <-
+#   read.csv("data/ox-ox-nodes.csv", stringsAsFactors = F)
+
 institution_nodes <-
-  read.csv("data/ox-ox-nodes.csv", stringsAsFactors = F)
+  read.csv("data/ox-ox-nodes_sat.csv", stringsAsFactors = F)
+
 # institution_edges <-
 #   read.csv("data/ox-ox-edges.csv", stringsAsFactors = F)
 
 
-institution_edges <- readLines("data/ox-ox-edges.json", warn = F) %>%
+institution_edges <- readLines("data/ox-ox-edges_sat.json", warn = F) %>%
   gather_array() %>%
   spread_values(from = jstring("Source")) %>% ## visNetwork wants from and to not source and target
   spread_values(to = jstring("Target")) %>% ## visNetwork wants from and to not source and target
@@ -29,7 +33,11 @@ institution_edges <- readLines("data/ox-ox-edges.json", warn = F) %>%
   spread_values(keywords = jstring("Keywords")) %>%
   spread_values(publication.type = jstring("Publication Type")) %>%
   spread_values(publication.date = jstring("Publication Date")) %>%
-  select(from, to, title, coauthors, publication.name, weights, keywords, publication.type, publication.date)
+  select(from, to, title, coauthors, collaborations, publication.name, weights, keywords, publication.type, publication.date) %>%
+  mutate(
+    collaborations = as.numeric(collaborations),
+    weights = as.numeric(weights)
+  )
 
 
 
@@ -101,11 +109,11 @@ node_legend <-
   data.frame(
     label = unique(department_colours$department),
     # shape = rep("square",5),
-    size =rep(10,5),
+    size =rep(10,length(department_colours$department)),
     # icon.code = c("f007","f0c0","f007"),
     icon.color = department_colours$colours,
     # icon.size = rep(5,5),
-    id = 1:5
+    id = 1:length(department_colours$department)
   )
 
 ## =========================== igraph ===========================================
