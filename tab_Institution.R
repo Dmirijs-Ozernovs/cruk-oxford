@@ -173,14 +173,16 @@ output$institution_selected_node_sidePanel <- renderUI({
   onClickInputCheck(
     never_Clicked = return(),
     show_Details = {
+
       wellPanel(
-        p(
+        p(strong(
           paste0(switch(
             input$institution_people_or_departments,
             "individuals" = "Selected Principal Investigator: ",
             "departments" = "Selected Department: "
           ),
-          input$institution_displayed_network_selected)
+          input$institution_displayed_network_selected
+          ))
         ),
         
         switch(
@@ -199,27 +201,98 @@ output$institution_selected_node_sidePanel <- renderUI({
           )
         ),
         
+        bsCollapse(
+          id = "institution_degree_info",
+          open = NULL,
+          bsCollapsePanel(HTML(paste0(
+            "<h5>",
+            "Degree: ", as.numeric(degree(institution_graph())[which(V(institution_graph())$name == input$institution_displayed_network_selected)]),
+            " ", "<span class='glyphicon glyphicon-question-sign' aria-hidden='true'></span>",
+            "</h5>"
+          )),
+          fluidPage(
+            HTML("
+                 <p><strong>Degree</strong> (Number of co-authorships)</p>
+
+                 <p>
+                 An individual with a high score will have a more central position and likely role in the network, and will have collaborated with many others. These are likely some of the most well established researchers in the community, with knowledge, expertise and resources that have driven a large number of collaborations.  We look to connect these individuals with new researchers joining the Centre to spread their knowledge and expertise, and they form part of our senior management group.
+                 </p>
+                 
+                 <p>
+                 Has been weighted to allow for the number of authors on any given paper (more authors equals a lower relative value for that paper), and also the number of papers between two PI’s.
+                 </p>
+                 
+                 <p>
+                 A higher degree score is an accumulation of these to give a single value for each PI. The higher the value the larger the number of connections.
+                 </p>")
+            ), style = "default")
+            ),
         
-        p(paste0(
-          "Degree: ", as.numeric(degree(institution_graph())[which(V(institution_graph())$name == input$institution_displayed_network_selected)])
-        )),
+        bsCollapse(
+          id = "institution_betweenness_info",
+          open = NULL,
+          bsCollapsePanel(HTML(paste0(
+            "<h5>",
+            "Betweenness: ", round(as.numeric(betweenness(
+              institution_graph()
+            )[which(V(institution_graph())$name == input$institution_displayed_network_selected)]), digits = 4),
+            " ", "<span class='glyphicon glyphicon-question-sign' aria-hidden='true'></span>",
+            "</h5>"
+          )),
+          fluidPage(
+            HTML("
+                 <p><strong>Betweeness</strong> (The number of the shortest paths that pass through a given investigator)</p>
+
+                 <p>
+                 Those with a high betweeness value often play the role of connecting different groups; spanning different communities within the network. We call these researchers boundary-spanners or super-connectors; they have the potential to bring together disparate groups and facilitate multi-disciplinary collaboration. We look to these researchers to help develop our working groups, cross-disciplinary activities, and to act as communication ambassadors for the Centre.
+                 </p>
+                 
+                 <p>
+                 They can act as brokers and connectors to bring others together, and can help to spread information and knowledge across different sub-communities within the network.
+                 </p>")
+          ), style = "default")
+        ),
         
-        p(paste0(
-          "Betweeness: ", round(as.numeric(betweenness(
-            institution_graph()
-          )[which(V(institution_graph())$name == input$institution_displayed_network_selected)]), digits = 4)
-        )),
-      
-        
-        
-        p(paste0(
-          "Closeness: ", round(as.numeric(closeness(
-            institution_graph()
-          )[which(V(institution_graph())$name == input$institution_displayed_network_selected)]), digits = 4)
-        )),
+        bsCollapse(
+          id = "institution_closeness_info",
+          open = NULL,
+          bsCollapsePanel(HTML(paste0(
+            "<h5>",
+            
+            "Closeness: ", round(as.numeric(closeness(
+              institution_graph()
+            )[which(V(institution_graph())$name == input$institution_displayed_network_selected)]), digits = 4),
+            " ", "<span class='glyphicon glyphicon-question-sign' aria-hidden='true'></span>",
+            "</h5>"
+          )),
+          fluidPage(
+            HTML("<p><strong>Closeness</strong> (the sum of the length of the shortest paths between the individual and all other individuals).</p>
+
+                 <p>
+                 Degree and closeness are interlinked, and those with a high closeness value will have a more central role in the network.
+                 </p>
+                 
+                 <p>
+                 It can be viewed as a value to assess  how long it will take information to spread from a given individual to others in the network. Those  with a high closeness value have the potential to play a role in effectively spreading information across the network.
+                 </p>")
+          ), style = "default")
+        ),
         
         actionButton("scroll_down_institution", "Scroll down for details", width = "100%")
       )
+      
+      # bsCollapse(
+      #   id = "institution_measure_info",
+      #   open = NULL,
+      #   bsCollapsePanel(HTML(
+      #     "Click for details about degree, betweenness and closessness"
+      #   ),
+      #   fluidPage(
+      #     includeMarkdown(
+      #       knitr::knit("network-measure-descriptions.Rmd")
+      #     )
+      #   ), style = "default")
+      #   )
     },
     destructive_Change = return()
   )
@@ -239,6 +312,7 @@ institution_individual_datatable <- reactive({
   subsetted_edges <-
     filter(institution_edges, from == selected_id |
              to == selected_id)
+
   subsetted_edges$from <-
     mapvalues(
       subsetted_edges$from,
@@ -253,6 +327,7 @@ institution_individual_datatable <- reactive({
       to = institution_nodes$name,
       warn_missing = FALSE
     )
+  
   select(
     subsetted_edges,
     from,
@@ -279,7 +354,7 @@ institution_department_datatable <- reactive({
     filter(institution_edges,
            from %in% department_members |
              to %in% department_members)
-  
+
   subsetted_edges$from <-
     mapvalues(
       subsetted_edges$from,
@@ -320,9 +395,10 @@ output$institution_selected_node_table <- DT::renderDataTable({
         value_for_col_1 <-
           input$institution_displayed_network_selected
         
+        ## == Modify rows where the selected individual is not in the "from" column
         rows_to_change <-
-          which(data_to_show[, 1] != value_for_col_1)
-        
+          which(data_to_show$from != value_for_col_1)
+
         lapply(rows_to_change, function(x) {
           first_col_value <- which(data_to_show[x, c(1, 2)] == value_for_col_1)
           colorder <-
@@ -330,7 +406,8 @@ output$institution_selected_node_table <- DT::renderDataTable({
 
           data_to_show[x,] <<- data_to_show[x, colorder]
         })
-        
+        ## == END
+
         data_to_show %>%
           rename_(
             "Selected PI" = "from",
@@ -358,7 +435,7 @@ output$institution_selected_node_table <- DT::renderDataTable({
     )
   })
   
-}, rownames = FALSE
+}, rownames = FALSE, extensions = "Responsive"
 # container = withTags(table(class = 'display',
 #                            thead(
 #                              tr(

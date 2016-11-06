@@ -21,12 +21,10 @@ output$PI_people_directory <- DT::renderDataTable({
   
   pi_directory <- left_join(pi_directory, pubs_per_author) %>%
     mutate(
-      Degree = revalue(name, degree(institution_igraph)),
-      Betweeness = revalue(name, betweenness(institution_igraph)),
-      Closeness = revalue(name, round(closeness(institution_igraph), digits = 4))
+      Degree = as.numeric(revalue(name, degree(institution_igraph))),
+      Betweeness = as.numeric(revalue(name, round(betweenness(institution_igraph), digits = 6))),
+      Closeness = as.numeric(revalue(name, round(closeness(institution_igraph), digits = 6)))
     )
-  
-  colnames(pi_directory)
   
   ## Beautify 
   pi_directory %>%

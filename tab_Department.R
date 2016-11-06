@@ -26,20 +26,13 @@ output$department_app_title <-
   renderUI(h1(paste(input$selected_department, "Profile")))
 
 output$department_app_description <- renderUI(wellPanel(
-  p(
-    paste(
-      "This lorem ipsum content is about the ",
-      input$selected_department,
-      "department and will describe what the department does and how amazing they are - it might also include links."
-    )
-  ),
-  p(
-    "The content may also include hyperlinks, and could be pulled into the app via an external source (such that it may be updateable) - however, such functionality would be beyond a Live Data Case Study."
+  includeMarkdown(
+    knitr::knit("department-tab_top-description.Rmd")
   )
 ))
 
 output$department_app_collapsile_info <- renderUI({
-  if(is.null(input$selected_department)){
+  if (is.null(input$selected_department)) {
     return()
   }
   
@@ -82,7 +75,7 @@ output$department_app_collapsile_info <- renderUI({
 
 output$department_people_directory_DT <- DT::renderDataTable({
   # institution_nodes[institution_nodes$department == input$selected_department, c("name", "institution", "department")]
-  # 
+  #
   
   department_graph <- as.undirected(department_graph())
   
@@ -91,9 +84,9 @@ output$department_people_directory_DT <- DT::renderDataTable({
     select(name, department) %>%
     arrange(name) %>%
     mutate(
-      Degree = revalue(name, degree(department_graph)),
-      Betweeness = revalue(name, betweenness(department_graph)),
-      Closeness = revalue(name, round(closeness(department_graph), digits = 4))
+      Degree = as.numeric(revalue(name, degree(department_graph))),
+      Betweeness = as.numeric(revalue(name, betweenness(department_graph))),
+      Closeness = as.numeric(revalue(name, round(closeness(department_graph), digits = 4)))
     ) %>%
     rename(Name = name, Department = department)
   
@@ -259,6 +252,7 @@ output$department_selected_node_sidePanel <- renderUI({
     never_Clicked = return(),
     show_Details = {
       wellPanel(
+        p(strong("Individual Stats")),
         p(
           paste0(
             "Selected Principal Investigator: ",
@@ -269,27 +263,105 @@ output$department_selected_node_sidePanel <- renderUI({
         p(paste0("Department: ", institution_nodes[institution_nodes$name == input$department_displayed_network_selected, "department"])),
         
         
-        p(paste0(
-          "Degree: ", as.numeric(degree(department_graph())[which(V(department_graph())$name == input$department_displayed_network_selected)])
-        )),
+        bsCollapse(
+          id = "department_degree_info",
+          open = NULL,
+          bsCollapsePanel(HTML(
+            paste0(
+              "<h5>",
+              "Degree: ",
+              as.numeric(degree(department_graph())[which(V(department_graph())$name == input$department_displayed_network_selected)]),
+              " ",
+              "<span class='glyphicon glyphicon-question-sign' aria-hidden='true'></span>",
+              "</h5>"
+            )
+          ),
+          fluidPage(
+            HTML(
+              "
+              <p><strong>Degree</strong> (Number of co-authorships)</p>
+              
+              <p>
+              An individual with a high score will have a more central position and likely role in the network, and will have collaborated with many others. These are likely some of the most well established researchers in the community, with knowledge, expertise and resources that have driven a large number of collaborations.  We look to connect these individuals with new researchers joining the Centre to spread their knowledge and expertise, and they form part of our senior management group.
+              </p>
+              
+              <p>
+              Has been weighted to allow for the number of authors on any given paper (more authors equals a lower relative value for that paper), and also the number of papers between two PI’s.
+              </p>
+              
+              <p>
+              A higher degree score is an accumulation of these to give a single value for each PI. The higher the value the larger the number of connections.
+              </p>"
+            )
+            ), style = "default")
+            ),
         
-        p(paste0(
-          "Betweeness: ", round(as.numeric(betweenness(
-            department_graph()
-          )[which(V(department_graph())$name == input$department_displayed_network_selected)]), digits = 4)
-        )),
+        bsCollapse(
+          id = "department_betweenness_info",
+          open = NULL,
+          bsCollapsePanel(HTML(
+            paste0(
+              "<h5>",
+              "Betweeness: ",
+              round(as.numeric(betweenness(
+                department_graph()
+              )[which(V(department_graph())$name == input$department_displayed_network_selected)]), digits = 4),
+              " ",
+              "<span class='glyphicon glyphicon-question-sign' aria-hidden='true'></span>",
+              "</h5>"
+            )
+          ),
+          fluidPage(
+            HTML(
+              "
+              <p><strong>Betweeness</strong> (The number of the shortest paths that pass through a given investigator)</p>
+              
+              <p>
+              Those with a high betweeness value often play the role of connecting different groups; spanning different communities within the network. We call these researchers boundary-spanners or super-connectors; they have the potential to bring together disparate groups and facilitate multi-disciplinary collaboration. We look to these researchers to help develop our working groups, cross-disciplinary activities, and to act as communication ambassadors for the Centre.
+              </p>
+              
+              <p>
+              They can act as brokers and connectors to bring others together, and can help to spread information and knowledge across different sub-communities within the network.
+              </p>"
+            )
+            ), style = "default")
+            ),
         
-        p(paste0(
-          "Closeness: ", round(as.numeric(closeness(
-            department_graph()
-          )[which(V(department_graph())$name == input$department_displayed_network_selected)]), digits = 4)
-        )),
+        bsCollapse(
+          id = "department_closeness_info",
+          open = NULL,
+          bsCollapsePanel(HTML(
+            paste0(
+              "<h5>",
+              "Closeness: ",
+              round(as.numeric(closeness(
+                department_graph()
+              )[which(V(department_graph())$name == input$department_displayed_network_selected)]), digits = 4),
+              " ",
+              "<span class='glyphicon glyphicon-question-sign' aria-hidden='true'></span>",
+              "</h5>"
+            )
+          ),
+          fluidPage(
+            HTML(
+              "<p><strong>Closeness</strong> (the sum of the length of the shortest paths between the individual and all other individuals).</p>
+              
+              <p>
+              Degree and closeness are interlinked, and those with a high closeness value will have a more central role in the network.
+              </p>
+              
+              <p>
+              It can be viewed as a value to assess  how long it will take information to spread from a given individual to others in the network. Those  with a high closeness value have the potential to play a role in effectively spreading information across the network.
+              </p>"
+            )
+            ), style = "default")
+            ),
         
         actionButton("scroll_down_department", "Scroll down for details", width = "100%")
-      )
+            )
     },
     destructive_Change = return()
-  )
+          )
 })
 
 observeEvent(input$scroll_down_department, {
@@ -341,6 +413,7 @@ department_within_department_table <- reactive({
     select(from,
            to,
            title,
+           collaborations,
            publication.name,
            publication.date)
 })
@@ -385,6 +458,7 @@ department_within_whole_table <- reactive({
     select(from,
            to,
            title,
+           collaborations,
            publication.name,
            publication.date)
 })
@@ -403,16 +477,19 @@ output$department_selected_node_table <- DT::renderDataTable({
         value_for_col_1 <-
           input$department_displayed_network_selected
         
+        ## == Modify rows where the selected individual is not in the "from" column
         rows_to_change <-
-          which(data_to_show[, 1] != value_for_col_1)
+          which(data_to_show$from != value_for_col_1)
         
         lapply(rows_to_change, function(x) {
-          first_col_value <- which(data_to_show[x, c(1, 2)] == value_for_col_1)
+          first_col_value <-
+            which(data_to_show[x, c(1, 2)] == value_for_col_1)
           colorder <-
             c(first_col_value, setdiff(1:ncol(data_to_show), first_col_value))
-          # print(colorder)
-          data_to_show[x,] <<- data_to_show[x, colorder]
+          
+          data_to_show[x, ] <<- data_to_show[x, colorder]
         })
+        ## == END
         
         data_to_show %>%
           rename_(
@@ -430,15 +507,17 @@ output$department_selected_node_table <- DT::renderDataTable({
         value_for_col_1 <-
           input$department_displayed_network_selected
         
+        print("before to change")
         rows_to_change <-
-          which(data_to_show[, 1] != value_for_col_1)
-        
+          which(data_to_show$from != value_for_col_1)
+        print("after to change")
         lapply(rows_to_change, function(x) {
-          first_col_value <- which(data_to_show[x, c(1, 2)] == value_for_col_1)
+          first_col_value <-
+            which(data_to_show[x, c(1, 2)] == value_for_col_1)
           colorder <-
             c(first_col_value, setdiff(1:ncol(data_to_show), first_col_value))
-          # print(colorder)
-          data_to_show[x,] <<- data_to_show[x, colorder]
+          
+          data_to_show[x, ] <<- data_to_show[x, colorder]
         })
         
         data_to_show %>%
@@ -455,7 +534,7 @@ output$department_selected_node_table <- DT::renderDataTable({
   })
   
   selected_node_table
-})
+}, extensions = "Responsive")
 
 output$department_selected_node_table_UI <- renderUI({
   if (input$department_displayed_network_selected == "") {
@@ -466,7 +545,6 @@ output$department_selected_node_table_UI <- renderUI({
         wellPanel("Select a node for more details")
       },
       show_Details = {
-        print("in showdetails")
         wellPanel(DT::dataTableOutput("department_selected_node_table"))
         # print(institution_nodes[institution_nodes$name == input$department_displayed_network_selected, "id"])
       },
