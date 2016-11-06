@@ -1,5 +1,5 @@
 <p>
-The below visualisation showcases the Cancer Centre collaboration of the MRC Weatherall Institute of Molecular Medicine Department, based on co-authorships between 2010-2016.
+The below visualisation showcases the Cancer Centre collaboration of the Chemistry Department, based on co-authorships between 2010-2016.
 </p>
 
 <p>
