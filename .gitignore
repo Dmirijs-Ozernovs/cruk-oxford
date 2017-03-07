@@ -20,6 +20,7 @@
 # Ignore all xlsx files
 *.xlsx
 *.xls
+*.json
 
 # Google Analytics Code
 google-analytics.js
